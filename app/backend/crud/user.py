@@ -2,7 +2,7 @@ import models
 import schemas
 from sqlalchemy.orm import Session
 
-from .utils import generate_member_id, hash_password
+from .utils import hash_password
 
 
 def get_user(db: Session, user_id: int):
@@ -20,7 +20,7 @@ def get_user_by_uuid(db: Session, uuid: str):
 def get_user_by_member_id(db: Session, member_id: str):
     return (
         db.query(models.user.User)
-        .filter(models.user.User.member_id == member_id)
+        .filter(models.user.User.details["member_id"].astext == member_id)
         .first()
     )
 
@@ -29,14 +29,14 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.user.User).offset(skip).limit(limit).all()
 
 
+def get_users_by_role(db: Session, role: str):
+    return db.query(models.user.User).filter(models.user.User.role == role).all()
+
+
 def create_user(db: Session, user: schemas.user.UserCreate):
-    hashed_password = hash_password(user.password)  # Hash the password
+    hashed_password = hash_password(user.password)
     db_user = models.user.User(
-        email=user.email,
-        hashed_password=hashed_password,  # Store the hashed password
-        member_id=(
-            user.member_id if user.member_id else generate_member_id(db)
-        ),  # Use provided member_id or generate one
+        email=user.email, hashed_password=hashed_password, details=user.details
     )
     db.add(db_user)
     db.commit()
