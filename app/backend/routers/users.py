@@ -1,7 +1,8 @@
 from uuid import UUID
 
 from crud import user as user_crud
-from deps import get_db
+from crud.utils import check_role
+from deps import get_current_user, get_db
 from fastapi import APIRouter, Depends, HTTPException
 from schemas import user as user_schema
 from sqlalchemy.orm import Session
@@ -23,6 +24,12 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return users
 
 
+@router.get("/me", response_model=user_schema.User)
+def get_me(current_user: user_schema.User = Depends(get_current_user)):
+    """Get the currently authenticated user's details."""
+    return current_user
+
+
 @router.get("/{user_uuid}", response_model=user_schema.User)
 def read_user(user_uuid: UUID, db: Session = Depends(get_db)):
     db_user = user_crud.get_user_by_uuid(db, uuid=str(user_uuid))
@@ -31,17 +38,9 @@ def read_user(user_uuid: UUID, db: Session = Depends(get_db)):
     return db_user
 
 
-@router.get("/member_id/{member_id}", response_model=user_schema.User)
-def read_user_by_member_id(member_id: str, db: Session = Depends(get_db)):
-    db_user = user_crud.get_user_by_member_id(db, member_id=member_id)
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
-
-
 @router.put("/{uuid}", response_model=user_schema.User)
 def update_user(
-    uuid: UUID, user: user_schema.UserCreate, db: Session = Depends(get_db)
+    uuid: UUID, user: user_schema.UserUpdate, db: Session = Depends(get_db)
 ):
     uuid = str(uuid)
     db_user = user_crud.get_user_by_uuid(db, uuid=uuid)
@@ -54,7 +53,22 @@ def update_user(
 
 
 @router.delete("/{uuid}", response_model=dict)
-def delete_user(uuid: UUID, db: Session = Depends(get_db)):
+def delete_user(
+    uuid: UUID,
+    db: Session = Depends(get_db),
+    current_user: user_schema.User = Depends(get_current_user),
+):
+    # Ensure only admins can delete users
+    check_role(current_user, "admin")
+
+    # Check if there are any other admins (only allow deletion if there are others)
+    other_admins = user_crud.get_users_by_role(db, role="admin")
+    if len(other_admins) <= 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot delete the last admin user",
+        )
+
     if user_crud.delete_user(db, uuid=str(uuid)):
         return {"ok": True}
     else:
