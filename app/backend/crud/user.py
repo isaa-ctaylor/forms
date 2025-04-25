@@ -36,7 +36,14 @@ def get_users_by_role(db: Session, role: str):
 def create_user(db: Session, user: schemas.user.UserCreate):
     hashed_password = hash_password(user.password)
     db_user = models.user.User(
-        email=user.email, hashed_password=hashed_password, details=user.details
+        email=user.email,
+        hashed_password=hashed_password,
+        details=user.details,
+        role=user.role,
+        first_name=user.first_name,
+        middle_names=user.middle_names,
+        last_name=user.last_name,
+        is_active=user.is_active,
     )
     db.add(db_user)
     db.commit()
