@@ -30,12 +30,12 @@ def verify_access_token(token: str) -> dict:
     except ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
+            detail={"message": "Token has expired"},
             headers={"WWW-Authenticate": "Bearer"},
         )
     except jwt.JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
+            detail={"message": "Invalid token"},
             headers={"WWW-Authenticate": "Bearer"},
         )

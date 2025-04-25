@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, List
 
 from database.database import SessionLocal, get_db
 from fastapi import Depends, HTTPException, status
@@ -25,7 +25,7 @@ def get_current_user(
     """Retrieve the currently authenticated user."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail={"message": "Could not validate credentials"},
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
@@ -41,3 +41,23 @@ def get_current_user(
         return user
     except JWTError:
         raise credentials_exception
+
+
+class RequireRoles:
+    def __getitem__(self, roles: List[str]):
+        """Return a dependency that checks if the user has one of the required roles."""
+
+        def dependency(current_user: User = Depends(get_current_user)) -> None:
+            if current_user.role not in roles:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail={
+                        "message": "You do not have the required permissions to access this resource."
+                    },
+                )
+
+        return Depends(dependency)
+
+
+# Instantiate the class for use
+require_roles = RequireRoles()
