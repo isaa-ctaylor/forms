@@ -14,9 +14,10 @@ class User(Base):
     first_name = Column(String, nullable=True)
     middle_names = Column(String, nullable=True)
     last_name = Column(String, nullable=True)
-    email = Column(String, unique=True, index=True)
+    email = Column(String, index=True)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
+    is_deleted = Column(Boolean, default=False)
     details = Column(JSON, default={})
     role = Column(Enum("admin", "user", "moderator", name="user_roles"), default="user")
 

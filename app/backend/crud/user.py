@@ -62,10 +62,14 @@ def update_user(db: Session, uuid: str, user_update: schemas.user.UserUpdate):
     return db_user
 
 
-def delete_user(db: Session, uuid: int):
+def delete_user(db: Session, uuid: str):
     db_user = db.query(models.user.User).filter(models.user.User.uuid == uuid).first()
     if db_user:
-        db.delete(db_user)
-        db.commit()
-        return True
-    return False
+        new_db_user = schemas.user.UserUpdate(
+            email=db_user.email,  # type: ignore
+            is_active=False,
+            is_deleted=True,
+        )
+        db_user = update_user(db, uuid, new_db_user)
+        return db_user
+    return None
