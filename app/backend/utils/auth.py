@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 from config import settings
 from fastapi import HTTPException, status
-from jose import ExpiredSignatureError, jwt
+from jose import ExpiredSignatureError, JWTError, jwt
 
 
 def create_access_token(data: dict) -> str:
@@ -33,7 +33,7 @@ def verify_access_token(token: str) -> dict:
             detail={"message": "Token has expired"},
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except jwt.JWTError:
+    except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"message": "Invalid token"},
