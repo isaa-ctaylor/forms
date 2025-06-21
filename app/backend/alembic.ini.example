@@ -63,7 +63,7 @@ version_path_separator = os
 # are written from script.py.mako
 # output_encoding = utf-8
 
-sqlalchemy.url = postgresql://forms-app-user:breakout-alarm-denise-quantum@localhost:5432/forms
+sqlalchemy.url = postgresql://forms-app-user:password@localhost:5432/forms
 
 
 [post_write_hooks]

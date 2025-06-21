@@ -3,7 +3,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 # Replace with your actual database URL
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/forms"
+SQLALCHEMY_DATABASE_URL = (
+    "postgresql://forms-app-user:breakout-alarm-denise-quantum@localhost:5432/forms"
+)
 # SQLALCHEMY_DATABASE_URL = "sqlite:///./forms.db"  # For SQLite
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
