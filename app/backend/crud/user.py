@@ -1,3 +1,5 @@
+from operator import is_
+
 import models
 import schemas
 from sqlalchemy.orm import Session
@@ -10,7 +12,12 @@ def get_user(db: Session, user_id: int):
 
 
 def get_user_by_email(db: Session, email: str):
-    return db.query(models.user.User).filter(models.user.User.email == email).first()
+    return (
+        db.query(models.user.User)
+        .filter(models.user.User.is_deleted == False)
+        .filter(models.user.User.email == email)
+        .first()
+    )
 
 
 def get_user_by_uuid(db: Session, uuid: str):
@@ -26,11 +33,22 @@ def get_user_by_member_id(db: Session, member_id: str):
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.user.User).offset(skip).limit(limit).all()
+    return (
+        db.query(models.user.User)
+        .filter(models.user.User.is_deleted == False)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def get_users_by_role(db: Session, role: str):
-    return db.query(models.user.User).filter(models.user.User.role == role).all()
+    return (
+        db.query(models.user.User)
+        .filter(models.user.User.is_deleted == False)
+        .filter(models.user.User.role == role)
+        .all()
+    )
 
 
 def create_user(db: Session, user: schemas.user.UserCreate):
@@ -44,6 +62,7 @@ def create_user(db: Session, user: schemas.user.UserCreate):
         middle_names=user.middle_names,
         last_name=user.last_name,
         is_active=user.is_active,
+        is_deleted=user.is_deleted,
     )
     db.add(db_user)
     db.commit()
