@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: forms-postgres
+    restart: always # Automatically restart the container if it stops
+    environment:
+      POSTGRES_DB: forms
+      POSTGRES_USER: forms-app-user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432" # Map host port 5432 to container port 5432
+    volumes:
+      - ./app/backend/init-database.sql:/docker-entrypoint-initdb.d/init-database.sql # Initialize the database with a script
+      - pgdata:/var/lib/postgresql/data # Mount the named volume for persistence
+
+volumes:
+  pgdata:
