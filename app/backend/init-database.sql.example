@@ -1,0 +1,16 @@
+-- Create a new user for the forms application
+CREATE USER "forms-app-user" WITH PASSWORD 'password';
+
+-- Create the 'forms' database
+CREATE DATABASE IF NOT EXISTS forms;
+
+-- Grant all privileges on the 'forms' database to the new user
+GRANT ALL PRIVILEGES ON DATABASE forms TO "forms-app-user";
+
+-- Optional: Set the new user as the owner of the database
+-- This is often done for better permission management
+ALTER DATABASE forms OWNER TO "forms-app-user";
+
+-- Optional: Revoke public access if desired for tighter security
+-- REVOKE ALL ON DATABASE forms FROM PUBLIC;
+-- GRANT CONNECT ON DATABASE forms TO "forms-app-user";
