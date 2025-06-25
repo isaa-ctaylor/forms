@@ -1,0 +1,41 @@
+# docker-compose.yaml
+name: forms-dev
+
+services:
+  db:
+    image: postgres:17.5-alpine3.22
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persist data
+    # ports:
+    #   - "5432:5432" # Optional: if you need to access the DB from your host
+
+  backend:
+    build: ./app/backend # Or specify a path to your FastAPI application
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: ${FASTAPI_DATABASE_URL}
+      SECRET_KEY: ${FASTAPI_SECRET_KEY}
+    depends_on:
+      - db
+
+  # nginx:
+  #   image: nginx:latest
+  #   restart: always
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro # Mount your custom Nginx config
+  #     # - ./static:/usr/share/nginx/html/static:ro # Optional: for serving static files
+  #   ports:
+  #     - "80:80" # Map host port 80 to Nginx port 80
+  #     # - "443:443" # For HTTPS, with appropriate SSL config in nginx.conf
+  #   depends_on:
+  #     - backend # Nginx depends on the FastAPI service(s) being up
+
+volumes:
+  postgres_data:
