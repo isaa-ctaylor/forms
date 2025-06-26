@@ -1,5 +1,5 @@
 # docker-compose.yaml
-name: forms-prod
+name: forms-dev
 
 services:
   db:
@@ -11,17 +11,16 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data # Persist data
-    # No port mapping for DB if only accessed by backend services within Docker network
-    # - "5432:5432" # Optional: if you need to access the DB from your host
+    # ports:
+    #   - "5432:5432" # Optional: if you need to access the DB from your host
 
   backend:
     build: ./app/backend # Or specify a path to your FastAPI application
     command: uvicorn main:app --host 0.0.0.0 --port 8000
-    # No port mapping for backend service, as Nginx will handle external access
-    # - "8000:8000"
-    environment:
-      DATABASE_URL: ${FASTAPI_DATABASE_URL}
-      SECRET_KEY: ${FASTAPI_SECRET_KEY}
+    # ports:
+    #   - "8000:8000"
+    env_file:
+      - .env
     depends_on:
       - db
 
